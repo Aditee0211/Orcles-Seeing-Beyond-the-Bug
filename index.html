@@ -1,13 +1,689 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ReWear - Community Clothing Exchange Platform</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReWear | Sustainable Fashion Exchange</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet"/>
+    <style>
+        /* General Body & Font Styles */
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #f4f4f4; /* Light background for the whole site */
+            color: #333; /* Default text color */
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh; /* Ensure body takes full viewport height */
+        }
+
+        /* Header Styles */
+        header {
+            background-color: #4b3a78; /* Deep purple */
+            color: white;
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            flex-wrap: wrap;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .user-info {
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .user-info span {
+            font-weight: bold;
+        }
+
+        .logout-btn {
+            background-color: #f0f0f0;
+            color: #4b3a78;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background-color: #e0e0e0;
+        }
+
+        /* Main Content Area */
+        main {
+            flex-grow: 1;
+            padding: 40px 20px;
+            max-width: 1200px;
+            margin: 20px auto;
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            min-height: 500px; /* Ensure some height even if content is small */
+            display: flex; /* To center content within main */
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .section-title {
+            color: #4b3a78;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 32px;
+        }
+
+        /* Auth Container Styles */
+        .auth-container {
+            background-color: #fff;
+            padding: 30px 40px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+            animation: fadeIn 0.8s ease-out;
+            margin: auto; /* Center the container */
+        }
+
+        .auth-container h2 {
+            color: #4b3a78;
+            margin-bottom: 25px;
+            font-size: 28px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+        .form-group input[type="email"],
+        .form-group input[type="password"] {
+            width: calc(100% - 22px); /* Account for padding */
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+        .form-group input[type="email"]:focus,
+        .form-group input[type="password"]:focus {
+            border-color: #4b3a78;
+            outline: none;
+        }
+
+        button.primary-btn {
+            background-color: #4b3a78;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            width: 100%;
+            margin-top: 10px;
+        }
+        button.primary-btn:hover {
+            background-color: #372c59;
+            transform: translateY(-2px);
+        }
+
+        .toggle-form {
+            margin-top: 25px;
+            font-size: 15px;
+            color: #666;
+        }
+        .toggle-form a {
+            color: #4b3a78;
+            text-decoration: none;
+            font-weight: bold;
+            cursor: pointer; /* Indicate it's clickable */
+            transition: color 0.3s ease;
+        }
+        .toggle-form a:hover {
+            color: #2d1e46;
+            text-decoration: underline;
+        }
+
+        .message {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            display: none; /* Hidden by default */
+            animation: slideInTop 0.5s ease-out;
+        }
+        .message.success {
+            background-color: #e6ffe6;
+            color: #28a745;
+            border: 1px solid #28a745;
+        }
+        .message.error {
+            background-color: #ffe6e6;
+            color: #dc3545;
+            border: 1px solid #dc3545;
+        }
+        .message.info {
+            background-color: #e0f7fa;
+            color: #007bff;
+            border: 1px solid #007bff;
+        }
+
+        /* Dashboard Specific Styles */
+        #dashboard-content {
+            width: 100%;
+            text-align: center;
+        }
+
+        .dashboard-sections {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .dashboard-card {
+            background-color: #f9f9f9;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            text-align: center;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        }
+
+        .dashboard-card h3 {
+            color: #4b3a78;
+            margin-bottom: 15px;
+            font-size: 22px;
+        }
+
+        .dashboard-card p {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #555;
+        }
+
+        .dashboard-card .action-btn {
+            background-color: #6a5acd; /* Medium purple */
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 15px;
+            margin-top: 20px;
+            transition: background-color 0.3s ease;
+        }
+
+        .dashboard-card .action-btn:hover {
+            background-color: #5d4aaf;
+        }
+
+        /* Homepage Intro Section Styles */
+        #home-intro-content {
+            text-align: center;
+            padding: 20px;
+        }
+        #home-intro-content h2 {
+            font-size: 32px;
+            color: #4b3a78;
+            margin-bottom: 20px;
+        }
+        #home-intro-content p {
+            font-size: 18px;
+            max-width: 800px;
+            margin: 0 auto 30px auto;
+        }
+        #home-intro-content .btn-primary {
+            background-color: #4b3a78; /* Darker button for call to action */
+            color: white;
+        }
+        #home-intro-content .btn-primary:hover {
+            background-color: #372c59;
+        }
+
+
+        /* Footer Styles */
+        footer {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 25px;
+            margin-top: auto; /* Pushes footer to the bottom */
+            font-size: 15px;
+        }
+
+        /* Keyframe Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideInTop {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 10px 15px;
+            }
+            header h1 {
+                font-size: 24px;
+            }
+            .header-controls {
+                margin-top: 10px;
+                flex-direction: column;
+                width: 100%;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            main {
+                padding: 25px 15px;
+                margin: 15px auto;
+            }
+            .section-title {
+                font-size: 28px;
+            }
+            .auth-container {
+                padding: 25px;
+                margin: 30px auto;
+            }
+            .dashboard-card {
+                padding: 20px;
+            }
+            #home-intro-content h2 {
+                font-size: 28px;
+            }
+            #home-intro-content p {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>ReWear</h1>
+        <div class="header-controls" id="header-controls">
+            <button class="primary-btn" id="login-signup-button" onclick="showAuthPage()">Login / Signup</button>
+        </div>
+    </header>
+
+    <main id="main-content">
+        </main>
+
+    <footer>
+        &copy; 2025 ReWear. All rights reserved.
+    </footer>
+
+    <script>
+        // *** IMPORTANT: YOUR DEPLOYED APPS SCRIPT WEB APP URL ***
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby-1Lf2J9ovqOQzi77alu-4lDvPiEw452NHMelK9jneyJheHZ2uqsltZKuep4nE2PGK/exec'; // Your URL
+
+        const mainContent = document.getElementById('main-content');
+        const headerControls = document.getElementById('header-controls');
+        let currentView = ''; // Tracks the currently displayed view: 'home', 'auth', 'dashboard'
+
+        // --- Helper Function for Validation ---
+        function validateEmail(email) {
+            // Regex to check for a valid email format AND ending with @gmail.com
+            const emailRegex = /^[^\s@]+@[^\s@]+\.com$/; // Basic email format
+            if (!emailRegex.test(email)) {
+                return false;
+            }
+            // Additional check for @gmail.com
+            return email.endsWith('@gmail.com');
+        }
+
+        // --- Functions to render different views ---
+
+        function renderHomePage() {
+            currentView = 'home';
+            mainContent.innerHTML = `
+                <section id="home-intro-content">
+                    <h2>Welcome to ReWear!</h2>
+                    <p>Swap your pre-loved clothes for new-to-you items. Earn points for contributing and use them to get new outfits. It's good for your wallet and the planet!</p>
+                    <p>Become a part of a community that values sustainability and conscious consumption. Reduce waste, refresh your wardrobe, and connect with like-minded individuals.</p>
+                    <button class="btn-primary" onclick="showAuthPage()">Get Started Now!</button>
+                </section>
+            `;
+            updateHeaderForUnauthenticatedUser();
+        }
+
+        function renderAuthPage(showSignup = false) {
+            currentView = 'auth';
+            mainContent.innerHTML = `
+                <div class="auth-container">
+                    <h2 id="form-title">${showSignup ? 'Sign Up for ReWear' : 'Login to ReWear'}</h2>
+
+                    <div id="login-form" style="display: ${showSignup ? 'none' : 'block'};">
+                        <div class="form-group">
+                            <label for="loginEmail">Email:</label>
+                            <input type="email" id="loginEmail" placeholder="your.email@gmail.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="loginPassword">Password:</label>
+                            <input type="password" id="loginPassword" placeholder="********" required>
+                        </div>
+                        <button type="submit" class="primary-btn" onclick="handleLogin()">Login</button>
+                        <div class="toggle-form">
+                            Don't have an account? <a href="#" onclick="showSignupForm()">Sign Up</a>
+                        </div>
+                    </div>
+
+                    <div id="signup-form" style="display: ${showSignup ? 'block' : 'none'};">
+                        <div class="form-group">
+                            <label for="signupEmail">Email:</label>
+                            <input type="email" id="signupEmail" placeholder="your.email@gmail.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="signupPassword">Password:</label>
+                            <input type="password" id="signupPassword" placeholder="Minimum 8 characters" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="confirmPassword">Confirm Password:</label>
+                            <input type="password" id="confirmPassword" placeholder="Re-enter password" required>
+                        </div>
+                        <button type="submit" class="primary-btn" onclick="handleSignup()">Sign Up</button>
+                        <div class="toggle-form">
+                            Already have an account? <a href="#" onclick="showLoginForm()">Login</a>
+                        </div>
+                    </div>
+
+                    <div id="response-message" class="message"></div>
+                </div>
+            `;
+            updateHeaderForUnauthenticatedUser();
+            // Assign dynamic show/hide functions after elements are rendered
+            window.showSignupForm = () => {
+                document.getElementById('login-form').style.display = 'none';
+                document.getElementById('signup-form').style.display = 'block';
+                document.getElementById('form-title').textContent = 'Sign Up for ReWear';
+                clearMessage();
+                clearAuthFormFields();
+            };
+            window.showLoginForm = () => {
+                document.getElementById('login-form').style.display = 'block';
+                document.getElementById('signup-form').style.display = 'none';
+                document.getElementById('form-title').textContent = 'Login to ReWear';
+                clearMessage();
+                clearAuthFormFields();
+            };
+        }
+
+        function renderDashboardPage() {
+            currentView = 'dashboard';
+            const userEmail = localStorage.getItem('userEmail');
+            const userPoints = localStorage.getItem('userPoints');
+
+            if (!userEmail) { // Should not happen if checkSession is working, but for safety
+                renderAuthPage();
+                return;
+            }
+
+            mainContent.innerHTML = `
+                <div id="dashboard-content">
+                    <h2>Your ReWear Hub</h2>
+
+                    <div class="dashboard-sections">
+                        <div class="dashboard-card">
+                            <h3>Add New Item</h3>
+                            <p>Have clothes to exchange? List them here and earn points!</p>
+                            <button class="action-btn" onclick="alert('Functionality to be added!')">List a New Item</button>
+                        </div>
+
+                        <div class="dashboard-card">
+                            <h3>My Listed Items</h3>
+                            <p>View, edit, or remove the clothes you've put up for exchange.</p>
+                            <button class="action-btn" onclick="alert('Functionality to be added!')">View My Items</button>
+                        </div>
+
+                        <div class="dashboard-card">
+                            <h3>Browse Available Items</h3>
+                            <p>Discover new clothing items uploaded by other users.</p>
+                            <button class="action-btn" onclick="alert('Functionality to be added!')">Browse Items</button>
+                        </div>
+
+                         <div class="dashboard-card">
+                            <h3>My Swap Requests</h3>
+                            <p>Manage pending and completed swap requests.</p>
+                            <button class="action-btn" onclick="alert('Functionality to be added!')">Manage Requests</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            updateHeaderForAuthenticatedUser(userEmail, userPoints);
+        }
+
+        // --- Header Update Functions ---
+
+        function updateHeaderForAuthenticatedUser(email, points) {
+            headerControls.innerHTML = `
+                <div class="user-info">
+                    Welcome, <span>${email}</span>! Your Points: <span>${points || '0'}</span>
+                </div>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            `;
+            document.querySelector('header h1').onclick = renderDashboardPage; // Make title link to dashboard
+            document.querySelector('header h1').style.cursor = 'pointer';
+        }
+
+        function updateHeaderForUnauthenticatedUser() {
+            headerControls.innerHTML = `
+                <button class="primary-btn" id="login-signup-button" onclick="showAuthPage()">Login / Signup</button>
+            `;
+            document.querySelector('header h1').onclick = renderHomePage; // Make title link to home
+            document.querySelector('header h1').style.cursor = 'pointer';
+        }
+
+        // --- Core Auth Logic ---
+
+        function displayMessage(message, type) {
+            const responseMessage = document.getElementById('response-message');
+            if (responseMessage) {
+                responseMessage.textContent = message;
+                responseMessage.className = `message ${type}`;
+                responseMessage.style.display = 'block';
+            }
+        }
+
+        function clearMessage() {
+            const responseMessage = document.getElementById('response-message');
+            if (responseMessage) {
+                responseMessage.style.display = 'none';
+                responseMessage.classList.remove('success', 'error', 'info');
+            }
+        }
+
+        function clearAuthFormFields() {
+            const loginEmail = document.getElementById('loginEmail');
+            const loginPassword = document.getElementById('loginPassword');
+            const signupEmail = document.getElementById('signupEmail');
+            const signupPassword = document.getElementById('signupPassword');
+            const confirmPassword = document.getElementById('confirmPassword');
+
+            if (loginEmail) loginEmail.value = '';
+            if (loginPassword) loginPassword.value = '';
+            if (signupEmail) signupEmail.value = '';
+            if (signupPassword) signupPassword.value = '';
+            if (confirmPassword) confirmPassword.value = '';
+        }
+
+        async function handleSignup() {
+            const email = document.getElementById('signupEmail').value.trim();
+            const password = document.getElementById('signupPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            clearMessage(); // Clear previous messages
+
+            if (!email) {
+                displayMessage('Email cannot be empty.', 'error');
+                return;
+            }
+            if (!validateEmail(email)) {
+                displayMessage('Please enter a valid email address ending with @gmail.com.', 'error');
+                return;
+            }
+            if (!password) {
+                displayMessage('Password cannot be empty.', 'error');
+                return;
+            }
+            if (password.length < 8) {
+                displayMessage('Password must be at least 8 characters long.', 'error');
+                return;
+            }
+            if (password !== confirmPassword) {
+                displayMessage('Passwords do not match.', 'error');
+                return;
+            }
+
+            displayMessage('Signing up...', 'info');
+
+            const formData = new FormData();
+            formData.append('action', 'signup');
+            formData.append('email', email);
+            formData.append('password', password);
+
+            try {
+                const response = await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    displayMessage(data.message, 'success');
+                    clearAuthFormFields();
+                    setTimeout(() => renderAuthPage(false), 2000); // Switch to login after signup
+                } else {
+                    displayMessage(data.message, 'error');
+                }
+            } catch (error) {
+                console.error('Error during signup:', error);
+                displayMessage('An error occurred during signup. Please try again later.', 'error');
+            }
+        }
+
+        async function handleLogin() {
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+
+            clearMessage(); // Clear previous messages
+
+            if (!email) {
+                displayMessage('Email cannot be empty.', 'error');
+                return;
+            }
+            if (!validateEmail(email)) {
+                displayMessage('Please enter a valid email address ending with @gmail.com.', 'error');
+                return;
+            }
+            if (!password) {
+                displayMessage('Password cannot be empty.', 'error');
+                return;
+            }
+
+            displayMessage('Logging in...', 'info');
+
+            const formData = new FormData();
+            formData.append('action', 'login');
+            formData.append('email', email);
+            formData.append('password', password);
+
+            try {
+                const response = await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    localStorage.setItem('sessionToken', data.sessionToken);
+                    localStorage.setItem('userId', data.userId);
+                    localStorage.setItem('userEmail', data.email);
+                    localStorage.setItem('userPoints', data.points);
+                    localStorage.setItem('userRole', data.role);
+
+                    displayMessage(data.message + ' Redirecting...', 'success');
+                    clearAuthFormFields();
+                    setTimeout(renderDashboardPage, 1500);
+                } else {
+                    displayMessage(data.message, 'error');
+                }
+            } catch (error) {
+                console.error('Error during login:', error);
+                displayMessage('An error occurred during login. Please try again later.', 'error');
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('sessionToken');
+            localStorage.removeItem('userId');
+            localStorage.removeItem('userEmail');
+            localStorage.removeItem('userPoints');
+            localStorage.removeItem('userRole');
+            renderHomePage(); // Go back to home page after logout
+        }
+
+        // --- Navigation Functions (called by buttons/links) ---
+        function showAuthPage() {
+            renderAuthPage(false); // Show login form by default
+        }
+
+        function showDashboardPage() {
+            // First check if user is authenticated
+            const sessionToken = localStorage.getItem('sessionToken');
+            const userEmail = localStorage.getItem('userEmail');
+
+            if (sessionToken && userEmail) {
+                // In a real app, you'd want to validate the session token with the backend here.
+                // For this example, we'll assume if token exists, it's valid for initial render.
+                renderDashboardPage();
+            } else {
+                renderAuthPage(); // Redirect to login if not authenticated
+            }
+        }
+
+        // --- Initial Load Logic ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const sessionToken = localStorage.getItem('sessionToken');
+            if (sessionToken) {
+                showDashboardPage(); // Try to show dashboard if a token exists
+            } else {
+                renderHomePage(); // Show the home page if no token
+            }
+        });
+
+    </script>
+</body>
 </html>
