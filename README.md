@@ -74,12 +74,26 @@ ReWear aims to revolutionize how we think about fashion consumption by creating 
 ##  Technical Stack
 
 
-- **Frontend**: 
-- **Backend**: 
-- **Database**: 
-- **Authentication**: 
-- **File Storage**: 
-- **Hosting**: 
+### Frontend
+- **React 18** - Modern React with hooks and concurrent features
+- **TypeScript** - Type safety and enhanced developer experience
+- **Tailwind CSS** - Utility-first styling with custom design system
+- **Lucide React** - Beautiful, consistent icon library
+- **React Router** - Client-side routing and navigation
+- **React Hook Form** - Performant form handling with validation
+- **Yup** - Schema validation for forms
+
+### Backend & Services
+- **Firebase Authentication** - Secure user management with email/password
+- **Firestore** - NoSQL database for real-time data synchronization
+- **Firebase Storage** - Scalable image and file storage
+- **Firebase Hosting** - Fast, secure web hosting with global CDN
+
+### Development Tools
+- **Vite** - Fast build tool and development server
+- **ESLint** - Code linting and quality enforcement
+- **TypeScript** - Static type checking and IntelliSense
+- **PostCSS** - CSS processing and optimization
 
 ##  Design & Mockups
 
@@ -88,40 +102,77 @@ View the platform mockups and design specifications: [Excalidraw Mockup](https:/
 ##  Getting Started
 
 ### Prerequisites
-
+- Node.js 18+ and npm
+- Firebase account
+- Git
 
 ### Installation
 
-1. Clone the repository:
-```bash
-git clone https://github.com/Aditee0211/Orcles-Seeing-Beyond-the-Bug.git
-cd rewear
-```
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/Aditee0211/Orcles-Seeing-Beyond-the-Bug.git
+   cd rewear
+   ```
 
-2. Install dependencies:
-```bash
-npm install
-```
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-3. Set up environment variables:
-```bash
-cp .env.example .env
-# Edit .env with your configuration
-```
+3. **Firebase Setup**
+   - Create a new project at [Firebase Console](https://console.firebase.google.com)
+   - Enable Authentication (Email/Password)
+   - Create Firestore database
+   - Enable Firebase Storage
+   - Copy your config from Project Settings
 
-4. Set up the database:
-```bash
-npm run db:setup
-```
+4. **Configure Firebase**
+   Update `src/lib/firebase.ts` with your Firebase configuration:
+   ```typescript
+   const firebaseConfig = {
+     apiKey: "your-api-key",
+     authDomain: "your-project.firebaseapp.com",
+     projectId: "your-project-id",
+     storageBucket: "your-project.appspot.com",
+     messagingSenderId: "your-sender-id",
+     appId: "your-app-id"
+   };
+   ```
 
-5. Start the development server:
-```bash
-npm run dev
-```
+5. **Start development server**
+   ```bash
+   npm run dev
+   ```
 
-Visit `http://localhost:3000` to see the application running.
+6. **Open your browser**
+   Navigate to `http://localhost:5173`
 
 ##  Project Structure
+```
+src/
+├── components/          # Reusable UI components
+│   ├── Layout/         # Header, Footer, Navigation
+│   └── ProtectedRoute.tsx
+├── contexts/           # React Context providers
+│   └── AuthContext.tsx # Authentication state management
+├── lib/               # External service configurations
+│   └── firebase.ts    # Firebase setup and exports
+├── pages/             # Main application pages
+│   ├── Home.tsx       # Landing page with featured items
+│   ├── Login.tsx      # User authentication
+│   ├── Register.tsx   # User registration
+│   ├── Dashboard.tsx  # User profile and activity
+│   ├── Browse.tsx     # Item browsing with filters
+│   ├── ItemDetail.tsx # Detailed item view
+│   ├── AddItem.tsx    # Add new item form
+│   ├── Admin.tsx      # Admin panel
+│   └── Search.tsx     # Search results page
+├── types/             # TypeScript type definitions
+│   └── index.ts       # Core data models
+├── App.tsx            # Main application component
+├── main.tsx           # Application entry point
+└── index.css          # Global styles with Tailwind
+```
 
 
 
