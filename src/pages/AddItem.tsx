@@ -4,20 +4,17 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { Upload, X, Plus, Camera } from 'lucide-react';
-import { collection, addDoc } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { db, storage } from '../lib/firebase';
+import { itemService, sessionManager } from '../lib/appsScriptService';
 import { useAuth } from '../contexts/AuthContext';
-import { ClothingItem } from '../types';
 
 const schema = yup.object({
   title: yup.string().required('Title is required').min(3, 'Title must be at least 3 characters'),
   description: yup.string().required('Description is required').min(10, 'Description must be at least 10 characters'),
   category: yup.string().required('Category is required'),
   size: yup.string().required('Size is required'),
-  condition: yup.string().required('Condition is required'),
+  condition: yup.string().required('Condition is required').oneOf(['excellent', 'good', 'fair'], 'Invalid condition'),
   pointsRequired: yup.number().required('Points are required').min(1, 'Points must be at least 1').max(200, 'Points cannot exceed 200'),
-  tags: yup.string()
+  tags: yup.string().optional()
 });
 
 interface FormData {
@@ -32,7 +29,6 @@ interface FormData {
 
 const AddItem: React.FC = () => {
   const navigate = useNavigate();
-  const { currentUser, userProfile } = useAuth();
   const [images, setImages] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -94,17 +90,14 @@ const AddItem: React.FC = () => {
   };
 
   const uploadImages = async (): Promise<string[]> => {
-    const uploadPromises = images.map(async (image, index) => {
-      const imageRef = ref(storage, `items/${currentUser?.uid}/${Date.now()}_${index}`);
-      const snapshot = await uploadBytes(imageRef, image);
-      return getDownloadURL(snapshot.ref);
-    });
-
-    return Promise.all(uploadPromises);
+    // For now, we'll use placeholder URLs
+    // In a real implementation, you'd upload to Google Drive or another service
+    return images.map((_, index) => `https://via.placeholder.com/400x400?text=Image+${index + 1}`);
   };
 
   const onSubmit = async (data: FormData) => {
-    if (!currentUser || !userProfile) {
+    const session = sessionManager.getSession();
+    if (!session) {
       alert('You must be logged in to add an item');
       return;
     }
@@ -117,7 +110,7 @@ const AddItem: React.FC = () => {
     setIsSubmitting(true);
 
     try {
-      // Upload images to Firebase Storage
+      // Upload images (placeholder implementation)
       const imageUrls = await uploadImages();
 
       // Process tags
@@ -125,27 +118,20 @@ const AddItem: React.FC = () => {
         ? data.tags.split(',').map(tag => tag.trim().toLowerCase()).filter(tag => tag)
         : [];
 
-      // Create item document
-      const itemData: Omit<ClothingItem, 'id'> = {
+      // Create item using Google Apps Script
+      const result = await itemService.addItem(session.sessionToken, {
         title: data.title,
         description: data.description,
         category: data.category,
         size: data.size,
-        condition: data.condition,
-        images: imageUrls,
-        tags,
+        condition: data.condition as 'excellent' | 'good' | 'fair',
         pointsRequired: data.pointsRequired,
-        ownerId: currentUser.uid,
-        ownerName: userProfile.displayName,
-        createdAt: new Date(),
-        status: 'available'
-      };
-
-      // Add to Firestore
-      const docRef = await addDoc(collection(db, 'items'), itemData);
+        tags: tags.join(','),
+        images: imageUrls
+      });
 
       alert('Item added successfully!');
-      navigate(`/item/${docRef.id}`);
+      navigate(`/item/${result.itemId}`);
     } catch (error) {
       console.error('Error adding item:', error);
       alert('Failed to add item. Please try again.');

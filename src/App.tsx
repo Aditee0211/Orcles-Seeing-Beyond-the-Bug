@@ -13,6 +13,7 @@ import ItemDetail from './pages/ItemDetail';
 import AddItem from './pages/AddItem';
 import Admin from './pages/Admin';
 import Search from './pages/Search';
+import LandingPage from './pages/LandingPage';
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
           <main className="flex-1">
             <Routes>
               <Route path="/" element={<Home />} />
+              <Route path="/landing" element={<LandingPage />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/browse" element={<Browse />} />

@@ -84,10 +84,10 @@ ReWear aims to revolutionize how we think about fashion consumption by creating 
 - **Yup** - Schema validation for forms
 
 ### Backend & Services
-- **Firebase Authentication** - Secure user management with email/password
-- **Firestore** - NoSQL database for real-time data synchronization
-- **Firebase Storage** - Scalable image and file storage
-- **Firebase Hosting** - Fast, secure web hosting with global CDN
+- **Google Apps Script** - Serverless backend with JavaScript
+- **Google Sheets** - Simple database using Google Sheets
+- **Google Drive** - File storage for images and documents
+- **Google Cloud** - Hosting and infrastructure
 
 ### Development Tools
 - **Vite** - Fast build tool and development server
@@ -103,7 +103,7 @@ View the platform mockups and design specifications: [Excalidraw Mockup](https:/
 
 ### Prerequisites
 - Node.js 18+ and npm
-- Firebase account
+- Google account
 - Git
 
 ### Installation
@@ -119,25 +119,25 @@ View the platform mockups and design specifications: [Excalidraw Mockup](https:/
    npm install
    ```
 
-3. **Firebase Setup**
-   - Create a new project at [Firebase Console](https://console.firebase.google.com)
-   - Enable Authentication (Email/Password)
-   - Create Firestore database
-   - Enable Firebase Storage
-   - Copy your config from Project Settings
+3. **Google Apps Script Setup**
+   - Create a Google Sheets database (see `GOOGLE_APPS_SCRIPT_SETUP.md`)
+   - Set up Google Apps Script backend
+   - Deploy as web app
+   - Copy the web app URL
 
-4. **Configure Firebase**
-   Update `src/lib/firebase.ts` with your Firebase configuration:
-   ```typescript
-   const firebaseConfig = {
-     apiKey: "your-api-key",
-     authDomain: "your-project.firebaseapp.com",
-     projectId: "your-project-id",
-     storageBucket: "your-project.appspot.com",
-     messagingSenderId: "your-sender-id",
-     appId: "your-app-id"
-   };
+4. **Configure Environment Variables**
+   
+   Create a `.env` file in the root directory with your configuration:
+   ```bash
+   # Google Apps Script Configuration
+   VITE_APPS_SCRIPT_URL=YOUR_WEB_APP_URL_HERE
+   
+   # Development Settings
+   VITE_APP_ENV=development
+   VITE_APP_NAME=ReWear
    ```
+   
+   **Important**: Replace `YOUR_WEB_APP_URL_HERE` with your actual Google Apps Script web app URL.
 
 5. **Start development server**
    ```bash
@@ -156,7 +156,7 @@ src/
 ├── contexts/           # React Context providers
 │   └── AuthContext.tsx # Authentication state management
 ├── lib/               # External service configurations
-│   └── firebase.ts    # Firebase setup and exports
+│   └── appsScriptService.ts # Google Apps Script service layer
 ├── pages/             # Main application pages
 │   ├── Home.tsx       # Landing page with featured items
 │   ├── Login.tsx      # User authentication

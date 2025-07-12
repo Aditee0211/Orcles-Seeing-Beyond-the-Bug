@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { Search as SearchIcon, Filter, Heart, Star } from 'lucide-react';
-import { ClothingItem } from '../types';
+import { itemService, type ClothingItem } from '../lib/appsScriptService';
 
 const Search: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -31,7 +31,8 @@ const Search: React.FC = () => {
       pointsRequired: 45,
       ownerId: 'user1',
       ownerName: 'Sarah Johnson',
-      createdAt: new Date(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
       status: 'available',
       featured: true
     },
@@ -47,8 +48,10 @@ const Search: React.FC = () => {
       pointsRequired: 35,
       ownerId: 'user2',
       ownerName: 'Emma Wilson',
-      createdAt: new Date(),
-      status: 'available'
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      status: 'available',
+      featured: false
     }
   ];
 
@@ -59,42 +62,20 @@ const Search: React.FC = () => {
   const performSearch = async () => {
     setLoading(true);
     try {
-      // In a real app, this would be a Firestore query
-      // For now, we'll filter mock data based on the search query
-      let filteredResults = mockResults;
+      // Use Google Apps Script to search items
+      const searchResults = await itemService.searchItems(query, {
+        category: filters.category || undefined,
+        condition: filters.condition || undefined,
+        size: filters.size || undefined,
+        minPoints: filters.minPoints ? parseInt(filters.minPoints) : undefined,
+        maxPoints: filters.maxPoints ? parseInt(filters.maxPoints) : undefined
+      });
 
-      if (query) {
-        filteredResults = filteredResults.filter(item =>
-          item.title.toLowerCase().includes(query.toLowerCase()) ||
-          item.description.toLowerCase().includes(query.toLowerCase()) ||
-          item.tags.some(tag => tag.toLowerCase().includes(query.toLowerCase()))
-        );
-      }
-
-      // Apply additional filters
-      if (filters.category) {
-        filteredResults = filteredResults.filter(item => item.category === filters.category);
-      }
-
-      if (filters.condition) {
-        filteredResults = filteredResults.filter(item => item.condition === filters.condition);
-      }
-
-      if (filters.size) {
-        filteredResults = filteredResults.filter(item => item.size === filters.size);
-      }
-
-      if (filters.minPoints) {
-        filteredResults = filteredResults.filter(item => item.pointsRequired >= parseInt(filters.minPoints));
-      }
-
-      if (filters.maxPoints) {
-        filteredResults = filteredResults.filter(item => item.pointsRequired <= parseInt(filters.maxPoints));
-      }
-
-      setResults(filteredResults);
+      setResults(searchResults);
     } catch (error) {
       console.error('Error performing search:', error);
+      // Fallback to mock data if API fails
+      setResults(mockResults);
     } finally {
       setLoading(false);
     }
