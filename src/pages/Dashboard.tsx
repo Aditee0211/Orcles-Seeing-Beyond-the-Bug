@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, TrendingUp, Package, Heart, Award } from 'lucide-react';
+import { Plus, TrendingUp, Package, Heart, Award, Users, ShoppingBag, Settings } from 'lucide-react';
+import { itemService, swapService, sessionManager, type ClothingItem, type SwapRequest } from '../lib/appsScriptService';
 import { useAuth } from '../contexts/AuthContext';
 
 const Dashboard: React.FC = () => {
@@ -81,19 +82,11 @@ const Dashboard: React.FC = () => {
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              {userProfile?.photoURL ? (
-                <img
-                  src={userProfile.photoURL}
-                  alt="Profile"
-                  className="w-16 h-16 rounded-full object-cover"
-                />
-              ) : (
-                <div className="w-16 h-16 bg-emerald-500 rounded-full flex items-center justify-center">
-                  <span className="text-white font-bold text-xl">
-                    {userProfile?.displayName?.charAt(0).toUpperCase()}
-                  </span>
-                </div>
-              )}
+              <div className="w-16 h-16 bg-emerald-500 rounded-full flex items-center justify-center">
+                <span className="text-white font-bold text-xl">
+                  {userProfile?.displayName?.charAt(0).toUpperCase() || 'U'}
+                </span>
+              </div>
               <div>
                 <h1 className="text-3xl font-bold text-gray-900">
                   Welcome back, {userProfile?.displayName}!

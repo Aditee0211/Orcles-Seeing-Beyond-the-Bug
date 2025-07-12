@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Search, Filter, Grid, List, Heart, Star } from 'lucide-react';
-import { collection, query, where, orderBy, limit, getDocs, startAfter, DocumentSnapshot } from 'firebase/firestore';
-import { db } from '../lib/firebase';
-import { ClothingItem } from '../types';
+import { itemService, type ClothingItem } from '../lib/appsScriptService';
 
 const Browse: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -18,7 +16,7 @@ const Browse: React.FC = () => {
     size: '',
     sortBy: 'newest'
   });
-  const [lastDoc, setLastDoc] = useState<DocumentSnapshot | null>(null);
+  const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
 
   const categories = ['Tops', 'Dresses', 'Pants', 'Shoes', 'Accessories', 'Outerwear'];
@@ -39,7 +37,8 @@ const Browse: React.FC = () => {
       pointsRequired: 45,
       ownerId: 'user1',
       ownerName: 'Sarah Johnson',
-      createdAt: new Date(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
       status: 'available',
       featured: true
     },
@@ -55,8 +54,10 @@ const Browse: React.FC = () => {
       pointsRequired: 35,
       ownerId: 'user2',
       ownerName: 'Emma Wilson',
-      createdAt: new Date(),
-      status: 'available'
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      status: 'available',
+      featured: false
     },
     {
       id: '3',
@@ -70,8 +71,10 @@ const Browse: React.FC = () => {
       pointsRequired: 65,
       ownerId: 'user3',
       ownerName: 'Lisa Chen',
-      createdAt: new Date(),
-      status: 'available'
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      status: 'available',
+      featured: false
     },
     {
       id: '4',
@@ -85,8 +88,10 @@ const Browse: React.FC = () => {
       pointsRequired: 25,
       ownerId: 'user4',
       ownerName: 'Mike Davis',
-      createdAt: new Date(),
-      status: 'available'
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      status: 'available',
+      featured: false
     },
     {
       id: '5',
@@ -100,8 +105,10 @@ const Browse: React.FC = () => {
       pointsRequired: 40,
       ownerId: 'user5',
       ownerName: 'Anna Rodriguez',
-      createdAt: new Date(),
-      status: 'available'
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      status: 'available',
+      featured: false
     },
     {
       id: '6',
@@ -115,8 +122,10 @@ const Browse: React.FC = () => {
       pointsRequired: 50,
       ownerId: 'user6',
       ownerName: 'Tom Wilson',
-      createdAt: new Date(),
-      status: 'available'
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      status: 'available',
+      featured: false
     }
   ];
 
@@ -127,53 +136,26 @@ const Browse: React.FC = () => {
   const loadItems = async () => {
     setLoading(true);
     try {
-      // In a real app, this would query Firestore
-      // For now, we'll filter the mock data
-      let filteredItems = [...mockItems];
+      // Use Google Apps Script to get items
+      const result = await itemService.getItems(
+        {
+          category: filters.category || undefined,
+          condition: filters.condition || undefined,
+          size: filters.size || undefined,
+          minPoints: filters.minPoints ? parseInt(filters.minPoints) : undefined,
+          maxPoints: filters.maxPoints ? parseInt(filters.maxPoints) : undefined
+        },
+        filters.sortBy as 'newest' | 'oldest' | 'price-low' | 'price-high',
+        page,
+        20
+      );
 
-      if (filters.category) {
-        filteredItems = filteredItems.filter(item => 
-          item.category.toLowerCase() === filters.category.toLowerCase()
-        );
-      }
-
-      if (filters.condition) {
-        filteredItems = filteredItems.filter(item => item.condition === filters.condition);
-      }
-
-      if (filters.size) {
-        filteredItems = filteredItems.filter(item => item.size === filters.size);
-      }
-
-      if (filters.minPoints) {
-        filteredItems = filteredItems.filter(item => 
-          item.pointsRequired >= parseInt(filters.minPoints)
-        );
-      }
-
-      if (filters.maxPoints) {
-        filteredItems = filteredItems.filter(item => 
-          item.pointsRequired <= parseInt(filters.maxPoints)
-        );
-      }
-
-      // Sort items
-      switch (filters.sortBy) {
-        case 'price-low':
-          filteredItems.sort((a, b) => a.pointsRequired - b.pointsRequired);
-          break;
-        case 'price-high':
-          filteredItems.sort((a, b) => b.pointsRequired - a.pointsRequired);
-          break;
-        case 'newest':
-        default:
-          filteredItems.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-          break;
-      }
-
-      setItems(filteredItems);
+      setItems(result.items);
+      setHasMore(result.hasMore);
     } catch (error) {
       console.error('Error loading items:', error);
+      // Fallback to mock data if API fails
+      setItems(mockItems);
     } finally {
       setLoading(false);
     }

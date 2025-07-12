@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Heart, Share2, Flag, User, Calendar, Package, Award, ArrowLeft, MessageCircle } from 'lucide-react';
-import { doc, getDoc, collection, addDoc, updateDoc, increment } from 'firebase/firestore';
-import { db } from '../lib/firebase';
+import { itemService, swapService, sessionManager, type ClothingItem, type SwapRequest } from '../lib/appsScriptService';
 import { useAuth } from '../contexts/AuthContext';
-import { ClothingItem, SwapRequest } from '../types';
 
 const ItemDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -34,7 +32,8 @@ const ItemDetail: React.FC = () => {
     pointsRequired: 45,
     ownerId: 'user1',
     ownerName: 'Sarah Johnson',
-    createdAt: new Date('2024-01-15'),
+    createdAt: new Date('2024-01-15').toISOString(),
+    updatedAt: new Date('2024-01-15').toISOString(),
     status: 'available',
     featured: true
   };
@@ -73,37 +72,26 @@ const ItemDetail: React.FC = () => {
   const loadItem = async () => {
     setLoading(true);
     try {
-      // In a real app, this would fetch from Firestore
-      // For now, we'll use the mock data
-      setItem(mockItem);
+      // Use Google Apps Script to get item details
+      const itemData = await itemService.getItem(id);
+      setItem(itemData);
     } catch (error) {
       console.error('Error loading item:', error);
+      // Fallback to mock data if API fails
+      setItem(mockItem);
     } finally {
       setLoading(false);
     }
   };
 
   const handleSwapRequest = async () => {
-    if (!currentUser || !item) return;
+    const session = sessionManager.getSession();
+    if (!session || !item) return;
 
     setIsSubmitting(true);
     try {
-      // Create swap request in Firestore
-      const swapRequest: Omit<SwapRequest, 'id'> = {
-        itemId: item.id,
-        requesterId: currentUser.uid,
-        ownerId: item.ownerId,
-        status: 'pending',
-        message: swapMessage,
-        createdAt: new Date()
-      };
-
-      await addDoc(collection(db, 'swapRequests'), swapRequest);
-      
-      // Update item status to pending
-      await updateDoc(doc(db, 'items', item.id), {
-        status: 'pending'
-      });
+      // Create swap request using Google Apps Script
+      await swapService.createSwapRequest(session.sessionToken, item.id, swapMessage);
 
       setShowSwapModal(false);
       setSwapMessage('');
@@ -117,7 +105,8 @@ const ItemDetail: React.FC = () => {
   };
 
   const handleRedeemWithPoints = async () => {
-    if (!currentUser || !item || !userProfile) return;
+    const session = sessionManager.getSession();
+    if (!session || !item || !userProfile) return;
 
     if (userProfile.points < item.pointsRequired) {
       alert('You don\'t have enough points for this item.');
@@ -131,20 +120,8 @@ const ItemDetail: React.FC = () => {
     if (!confirmed) return;
 
     try {
-      // Deduct points from user
-      await updateDoc(doc(db, 'users', currentUser.uid), {
-        points: increment(-item.pointsRequired)
-      });
-
-      // Add points to item owner
-      await updateDoc(doc(db, 'users', item.ownerId), {
-        points: increment(item.pointsRequired)
-      });
-
-      // Update item status
-      await updateDoc(doc(db, 'items', item.id), {
-        status: 'swapped'
-      });
+      // Redeem item using Google Apps Script
+      await itemService.redeemItem(session.sessionToken, item.id);
 
       alert('Item redeemed successfully!');
       navigate('/dashboard');
@@ -193,7 +170,7 @@ const ItemDetail: React.FC = () => {
     );
   }
 
-  const isOwner = currentUser?.uid === item.ownerId;
+  const isOwner = currentUser?.id === item.ownerId;
   const canAfford = userProfile && userProfile.points >= item.pointsRequired;
 
   return (

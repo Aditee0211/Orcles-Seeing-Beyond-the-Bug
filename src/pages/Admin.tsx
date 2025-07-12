@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Users, Package, AlertTriangle, TrendingUp, Eye, Check, X, Ban } from 'lucide-react';
-import { collection, query, orderBy, limit, getDocs, updateDoc, doc, deleteDoc } from 'firebase/firestore';
-import { db } from '../lib/firebase';
+import { adminService, sessionManager, type ClothingItem, type User, type SwapRequest } from '../lib/appsScriptService';
 import { useAuth } from '../contexts/AuthContext';
-import { ClothingItem, User, SwapRequest } from '../types';
 
 const Admin: React.FC = () => {
   const { userProfile } = useAuth();
@@ -20,7 +18,7 @@ const Admin: React.FC = () => {
       email: 'sarah@example.com',
       displayName: 'Sarah Johnson',
       points: 150,
-      joinedAt: new Date('2024-01-15'),
+      joinedAt: new Date('2024-01-15').toISOString(),
       isAdmin: false
     },
     {
@@ -28,7 +26,7 @@ const Admin: React.FC = () => {
       email: 'emma@example.com',
       displayName: 'Emma Wilson',
       points: 89,
-      joinedAt: new Date('2024-02-01'),
+      joinedAt: new Date('2024-02-01').toISOString(),
       isAdmin: false
     },
     {
@@ -36,7 +34,7 @@ const Admin: React.FC = () => {
       email: 'lisa@example.com',
       displayName: 'Lisa Chen',
       points: 234,
-      joinedAt: new Date('2024-01-20'),
+      joinedAt: new Date('2024-01-20').toISOString(),
       isAdmin: false
     }
   ];
@@ -54,8 +52,10 @@ const Admin: React.FC = () => {
       pointsRequired: 45,
       ownerId: 'user1',
       ownerName: 'Sarah Johnson',
-      createdAt: new Date('2024-01-16'),
-      status: 'available'
+      createdAt: new Date('2024-01-16').toISOString(),
+      updatedAt: new Date('2024-01-16').toISOString(),
+      status: 'available',
+      featured: false
     },
     {
       id: '2',
@@ -69,8 +69,10 @@ const Admin: React.FC = () => {
       pointsRequired: 35,
       ownerId: 'user2',
       ownerName: 'Emma Wilson',
-      createdAt: new Date('2024-01-18'),
-      status: 'pending'
+      createdAt: new Date('2024-01-18').toISOString(),
+      updatedAt: new Date('2024-01-18').toISOString(),
+      status: 'pending',
+      featured: false
     }
   ];
 
@@ -79,20 +81,24 @@ const Admin: React.FC = () => {
       id: 'swap1',
       itemId: '1',
       requesterId: 'user2',
+      requesterName: 'Emma Wilson',
       ownerId: 'user1',
+      ownerName: 'Sarah Johnson',
       status: 'pending',
       message: 'Hi! I love this jacket. Would you be interested in swapping?',
-      createdAt: new Date('2024-01-19')
+      createdAt: new Date('2024-01-19').toISOString()
     },
     {
       id: 'swap2',
       itemId: '2',
       requesterId: 'user3',
+      requesterName: 'Lisa Chen',
       ownerId: 'user2',
+      ownerName: 'Emma Wilson',
       status: 'accepted',
       message: 'This dress is perfect for my summer wardrobe!',
-      createdAt: new Date('2024-01-17'),
-      completedAt: new Date('2024-01-18')
+      createdAt: new Date('2024-01-17').toISOString(),
+      completedAt: new Date('2024-01-18').toISOString()
     }
   ];
 
@@ -103,22 +109,40 @@ const Admin: React.FC = () => {
   const loadData = async () => {
     setLoading(true);
     try {
-      // In a real app, these would be Firestore queries
+      const session = sessionManager.getSession();
+      if (!session) {
+        console.error('No session found');
+        return;
+      }
+
+      // Load real data from Google Apps Script
+      const [usersData, itemsData, swapsData, statsData] = await Promise.all([
+        adminService.getUsers(session.sessionToken),
+        adminService.getItems(session.sessionToken),
+        adminService.getSwapRequests(session.sessionToken),
+        adminService.getPlatformStats(session.sessionToken)
+      ]);
+
+      setUsers(usersData);
+      setItems(itemsData);
+      setSwaps(swapsData);
+    } catch (error) {
+      console.error('Error loading admin data:', error);
+      // Fallback to mock data if API fails
       setUsers(mockUsers);
       setItems(mockItems);
       setSwaps(mockSwaps);
-    } catch (error) {
-      console.error('Error loading admin data:', error);
     } finally {
       setLoading(false);
     }
   };
 
   const handleApproveItem = async (itemId: string) => {
+    const session = sessionManager.getSession();
+    if (!session) return;
+
     try {
-      await updateDoc(doc(db, 'items', itemId), {
-        status: 'available'
-      });
+      await adminService.approveItem(session.sessionToken, itemId);
       loadData();
     } catch (error) {
       console.error('Error approving item:', error);
@@ -126,8 +150,11 @@ const Admin: React.FC = () => {
   };
 
   const handleRejectItem = async (itemId: string) => {
+    const session = sessionManager.getSession();
+    if (!session) return;
+
     try {
-      await deleteDoc(doc(db, 'items', itemId));
+      await adminService.rejectItem(session.sessionToken, itemId);
       loadData();
     } catch (error) {
       console.error('Error rejecting item:', error);
@@ -135,13 +162,14 @@ const Admin: React.FC = () => {
   };
 
   const handleBanUser = async (userId: string) => {
+    const session = sessionManager.getSession();
+    if (!session) return;
+
     const confirmed = window.confirm('Are you sure you want to ban this user?');
     if (!confirmed) return;
 
     try {
-      await updateDoc(doc(db, 'users', userId), {
-        banned: true
-      });
+      await adminService.banUser(session.sessionToken, userId);
       loadData();
     } catch (error) {
       console.error('Error banning user:', error);
@@ -328,7 +356,7 @@ const Admin: React.FC = () => {
                                 <span className="font-medium text-emerald-600">{user.points}</span>
                               </td>
                               <td className="py-4 px-4 text-gray-600">
-                                {user.joinedAt.toLocaleDateString()}
+                                {new Date(user.joinedAt).toLocaleDateString()}
                               </td>
                               <td className="py-4 px-4">
                                 <div className="flex items-center space-x-2">
@@ -423,7 +451,7 @@ const Admin: React.FC = () => {
                                   {swap.status.charAt(0).toUpperCase() + swap.status.slice(1)}
                                 </span>
                                 <span className="text-sm text-gray-500">
-                                  {swap.createdAt.toLocaleDateString()}
+                                  {new Date(swap.createdAt).toLocaleDateString()}
                                 </span>
                               </div>
                               

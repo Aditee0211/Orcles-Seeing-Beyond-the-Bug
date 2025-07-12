@@ -1,13 +1,891 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ReWear - Community Clothing Exchange Platform</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReWear - Sustainable Fashion Exchange</title>
+    <style>
+        :root {
+            --primary-color: #4CAF50; /* Green */
+            --secondary-color: #2196F3; /* Blue */
+            --accent-color: #FFC107; /* Amber */
+            --background-color: #f4f7f6;
+            --text-color: #333;
+            --card-bg: #fff;
+            --border-color: #e0e0e0;
+            --error-color: #f44336;
+            --success-color: #4CAF50;
+            --info-color: #2196F3;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.8em;
+            cursor: pointer;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .user-details {
+            font-size: 0.95em;
+        }
+
+        .logout-btn {
+            background-color: var(--error-color);
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background-color 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background-color: #d32f2f;
+        }
+
+        main {
+            flex-grow: 1;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            flex-direction: column;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .container {
+            background-color: var(--card-bg);
+            padding: 30px 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            width: 100%;
+            max-width: 500px;
+            margin: 20px auto;
+            box-sizing: border-box;
+        }
+
+        h2 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 25px;
+            font-size: 2em;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: var(--text-color);
+        }
+
+        input[type="email"],
+        input[type="password"],
+        input[type="text"],
+        input[type="number"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1em;
+            box-sizing: border-box;
+        }
+
+        input[type="file"] {
+            padding: 8px 0; /* Adjust padding for file input */
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .primary-btn, .action-btn {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1em;
+            width: 100%;
+            box-sizing: border-box;
+            transition: background-color 0.3s ease;
+            display: block; /* Ensure buttons take full width within their container */
+            text-align: center;
+        }
+
+        .primary-btn:hover, .action-btn:hover {
+            background-color: #43a047;
+        }
+
+        .secondary-btn {
+            background-color: var(--secondary-color);
+            margin-top: 15px;
+        }
+
+        .secondary-btn:hover {
+            background-color: #1976d2;
+        }
+
+        .switch-form {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.95em;
+        }
+
+        .switch-form a {
+            color: var(--secondary-color);
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .switch-form a:hover {
+            text-decoration: underline;
+        }
+
+        .message {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: bold;
+            text-align: center;
+            font-size: 0.95em;
+        }
+
+        .message.success {
+            background-color: #e8f5e9;
+            color: var(--success-color);
+            border: 1px solid var(--success-color);
+        }
+
+        .message.error {
+            background-color: #ffebee;
+            color: var(--error-color);
+            border: 1px solid var(--error-color);
+        }
+
+        .message.info {
+            background-color: #e3f2fd;
+            color: var(--info-color);
+            border: 1px solid var(--info-color);
+        }
+
+        .dashboard-sections {
+            display: grid;
+            gap: 25px;
+            margin-top: 25px;
+            width: 100%;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+            padding: 0 20px;
+            box-sizing: border-box;
+        }
+
+        .dashboard-card {
+            background-color: var(--card-bg);
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            border: 1px solid var(--border-color);
+        }
+
+        .dashboard-card h3 {
+            color: var(--secondary-color);
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        .dashboard-card p {
+            font-size: 0.95em;
+            color: #555;
+            margin-bottom: 10px;
+        }
+
+        .dashboard-card .action-btn {
+            margin-top: 15px;
+        }
+
+        /* Specific styles for item cards */
+        .item-card {
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            text-align: left;
+        }
+        .item-card img {
+            width: 100%;
+            height: 200px; /* Fixed height for image consistency */
+            object-fit: cover; /* Cover ensures image fills the space without distortion */
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 1px solid var(--border-color);
+        }
+        .item-card h3 {
+            font-size: 1.2em;
+            margin-top: 0;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+        .item-card p {
+            margin: 5px 0;
+            font-size: 0.9em;
+        }
+        .item-card .action-btn {
+            margin-top: 10px;
+            font-size: 0.9em;
+            padding: 8px 15px;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .user-info {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .container, .dashboard-sections {
+                margin: 10px auto;
+                padding: 20px;
+            }
+            .dashboard-sections {
+                grid-template-columns: 1fr; /* Stack cards on small screens */
+            }
+            main {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1 onclick="checkAuthAndRender()">ReWear</h1>
+        <div class="user-info" id="header-user-info" style="display: none;">
+            <div class="user-details">
+                Hello, <span id="user-email"></span>! <br>
+                Points: <span id="user-points">0</span>
+            </div>
+            <button class="logout-btn" onclick="handleLogout()">Logout</button>
+        </div>
+    </header>
+
+    <main id="main-content">
+        <div id="loading-spinner" style="text-align: center; padding: 50px;">
+            <p>Loading...</p>
+        </div>
+    </main>
+
+    <script>
+        // --- Constants ---
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwBD6LPz9UiYYjOSmb9FU408-zzhuAoS1jCTyatzM-R9x8CAQPOuQyMHRi5hF2VfiJu/exec'; // **YOUR DEPLOYED APPS SCRIPT URL HERE**
+        const SITE_NAME = 'ReWear';
+
+        // --- DOM Elements ---
+        const mainContent = document.getElementById('main-content');
+        const headerUserInfo = document.getElementById('header-user-info');
+        const userEmailSpan = document.getElementById('user-email');
+        const userPointsSpan = document.getElementById('user-points');
+
+        let currentView = ''; // Tracks the currently rendered page for better state management
+
+        // --- Utility Functions ---
+        function displayMessage(message, type) {
+            const messageDiv = document.getElementById('response-message') || document.createElement('div');
+            messageDiv.id = 'response-message';
+            messageDiv.className = `message ${type}`;
+            messageDiv.textContent = message;
+            if (!document.getElementById('response-message')) {
+                mainContent.prepend(messageDiv); // Add to the top of main content
+            }
+            // Optional: Hide message after a few seconds if it's a success/info
+            if (type === 'success' || type === 'info') {
+                setTimeout(clearMessage, 5000);
+            }
+        }
+
+        function clearMessage() {
+            const messageDiv = document.getElementById('response-message');
+            if (messageDiv) {
+                messageDiv.remove();
+            }
+        }
+
+        function updateHeaderForAuthenticatedUser(email, points) {
+            if (email) {
+                userEmailSpan.textContent = email;
+                userPointsSpan.textContent = points || 0;
+                headerUserInfo.style.display = 'flex';
+            } else {
+                headerUserInfo.style.display = 'none';
+            }
+        }
+
+        // --- Authentication Functions ---
+        function showAuthPage() {
+            currentView = 'auth';
+            clearMessage();
+            mainContent.innerHTML = `
+                <div class="container">
+                    <h2>Login to ${SITE_NAME}</h2>
+                    <div id="response-message" class="message"></div>
+                    <form id="authForm">
+                        <div class="form-group">
+                            <label for="email">Email:</label>
+                            <input type="email" id="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Password:</label>
+                            <input type="password" id="password" required>
+                        </div>
+                        <button type="submit" class="primary-btn">Login</button>
+                    </form>
+                    <div class="switch-form">
+                        Don't have an account? <a href="#" onclick="showSignupForm()">Sign Up</a>
+                    </div>
+                </div>
+            `;
+            document.getElementById('authForm').addEventListener('submit', handleLogin);
+        }
+
+        function showSignupForm() {
+            clearMessage();
+            mainContent.innerHTML = `
+                <div class="container">
+                    <h2>Sign Up for ${SITE_NAME}</h2>
+                    <div id="response-message" class="message"></div>
+                    <form id="authForm">
+                        <div class="form-group">
+                            <label for="email">Email:</label>
+                            <input type="email" id="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Password:</label>
+                            <input type="password" id="password" required minlength="6">
+                        </div>
+                        <button type="submit" class="primary-btn secondary-btn">Sign Up</button>
+                    </form>
+                    <div class="switch-form">
+                        Already have an account? <a href="#" onclick="showAuthPage()">Login</a>
+                    </div>
+                </div>
+            `;
+            document.getElementById('authForm').addEventListener('submit', handleSignup);
+        }
+
+        async function handleLogin(event) {
+            event.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            clearMessage();
+            displayMessage('Logging in...', 'info');
+
+            const formData = new FormData();
+            formData.append('action', 'login');
+            formData.append('email', email);
+            formData.append('password', password);
+
+            try {
+                const response = await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    displayMessage(data.message, 'success');
+                    localStorage.setItem('sessionToken', data.sessionToken);
+                    localStorage.setItem('userId', data.userId);
+                    localStorage.setItem('userEmail', data.email);
+                    localStorage.setItem('userPoints', data.points);
+                    localStorage.setItem('userRole', data.role); // Store user role
+
+                    updateHeaderForAuthenticatedUser(data.email, data.points);
+                    renderDashboardPage(); // Redirect to dashboard on successful login
+                } else {
+                    displayMessage(data.message, 'error');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                displayMessage('An error occurred during login. Please try again.', 'error');
+            }
+        }
+
+        async function handleSignup(event) {
+            event.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const displayName = email.split('@')[0]; // Simple display name from email for now
+
+            clearMessage();
+            if (password.length < 6) {
+                displayMessage('Password must be at least 6 characters long.', 'error');
+                return;
+            }
+            displayMessage('Signing up...', 'info');
+
+            const formData = new FormData();
+            formData.append('action', 'register'); // Use 'register' action for signup
+            formData.append('email', email);
+            formData.append('password', password);
+            formData.append('displayName', displayName); // Add display name
+
+            try {
+                const response = await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    displayMessage(data.message, 'success');
+                    setTimeout(showAuthPage, 2000); // Redirect to login page after signup
+                } else {
+                    displayMessage(data.message, 'error');
+                }
+            } catch (error) {
+                console.error('Signup error:', error);
+                displayMessage('An error occurred during signup. Please try again.', 'error');
+            }
+        }
+
+        function handleLogout() {
+            localStorage.removeItem('sessionToken');
+            localStorage.removeItem('userId');
+            localStorage.removeItem('userEmail');
+            localStorage.removeItem('userPoints');
+            localStorage.removeItem('userRole'); // Clear user role too
+            updateHeaderForAuthenticatedUser(null);
+            showAuthPage(); // Go back to login page
+        }
+
+        // --- Dashboard & Navigation ---
+        function renderDashboardPage() {
+            currentView = 'dashboard';
+            clearMessage();
+            mainContent.innerHTML = `
+                <div class="container" style="max-width: 900px; padding: 30px; margin: 20px auto; text-align: center;">
+                    <h2>Welcome to Your ReWear Dashboard!</h2>
+                    <div id="response-message" class="message"></div>
+                    <div class="dashboard-sections">
+                        <div class="dashboard-card">
+                            <h3>List an Item</h3>
+                            <p>Have clothes to exchange? List them here and earn points!</p>
+                            <button class="action-btn" onclick="renderAddItemPage()">List a New Item</button>
+                        </div>
+                        <div class="dashboard-card">
+                            <h3>My Listed Items</h3>
+                            <p>View, edit, or remove the items you've put up for exchange.</p>
+                            <button class="action-btn" onclick="renderMyItemsPage()">View My Items</button>
+                        </div>
+                        <div class="dashboard-card">
+                            <h3>Browse Items</h3>
+                            <p>Explore available items from other users and redeem with your points.</p>
+                            <button class="action-btn" onclick="renderBrowseItemsPage()">Browse Items</button>
+                        </div>
+                        <div class="dashboard-card">
+                            <h3>Swap Requests</h3>
+                            <p>Manage incoming and outgoing swap requests.</p>
+                            <button class="action-btn" onclick="displayMessage('Swap Request management coming soon!', 'info')">View Swap Requests</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            updateHeaderForAuthenticatedUser(localStorage.getItem('userEmail'), localStorage.getItem('userPoints'));
+        }
+
+        // --- Add New Item Page ---
+        function renderAddItemPage() {
+            currentView = 'addItem';
+            clearMessage();
+            mainContent.innerHTML = `
+                <div class="container">
+                    <h2>List a New Item</h2>
+                    <div id="response-message" class="message"></div>
+                    <form id="addItemForm">
+                        <div class="form-group">
+                            <label for="itemDescription">Description:</label>
+                            <textarea id="itemDescription" placeholder="e.g., Blue denim jacket, slightly worn" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="itemCategory">Category:</label>
+                            <select id="itemCategory" required>
+                                <option value="">Select Category</option>
+                                <option value="Top">Top</option>
+                                <option value="Bottom">Bottom</option>
+                                <option value="Dress">Dress</option>
+                                <option value="Outerwear">Outerwear</option>
+                                <option value="Footwear">Footwear</option>
+                                <option value="Accessory">Accessory</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="itemSize">Size:</label>
+                            <select id="itemSize" required>
+                                <option value="">Select Size</option>
+                                <option value="XS">XS</option>
+                                <option value="S">S</option>
+                                <option value="M">M</option>
+                                <option value="L">L</option>
+                                <option value="XL">XL</option>
+                                <option value="XXL">XXL</option>
+                                <option value="One Size">One Size</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="itemCondition">Condition:</label>
+                            <select id="itemCondition" required>
+                                <option value="">Select Condition</option>
+                                <option value="New with Tags">New with Tags</option>
+                                <option value="Like New">Like New</option>
+                                <option value="Gently Used">Gently Used</option>
+                                <option value="Fair">Fair</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="itemPoints">Desired Points:</label>
+                            <input type="number" id="itemPoints" min="10" value="50" required>
+                            <small style="color: #777;">(e.g., 50 points)</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="itemImage">Upload Image:</label>
+                            <input type="file" id="itemImage" accept="image/jpeg, image/png" required>
+                            <small style="color: #777;">(Max 2MB, JPEG/PNG recommended)</small>
+                        </div>
+                        <button type="submit" class="primary-btn">Add Item</button>
+                    </form>
+                </div>
+            `;
+            document.getElementById('addItemForm').addEventListener('submit', handleAddItem);
+            updateHeaderForAuthenticatedUser(localStorage.getItem('userEmail'), localStorage.getItem('userPoints'));
+        }
+
+        async function handleAddItem(event) {
+            event.preventDefault();
+
+            const userId = localStorage.getItem('userId');
+            if (!userId) {
+                displayMessage('You must be logged in to add an item.', 'error');
+                setTimeout(showAuthPage, 1500);
+                return;
+            }
+
+            const description = document.getElementById('itemDescription').value.trim();
+            const category = document.getElementById('itemCategory').value;
+            const size = document.getElementById('itemSize').value;
+            const condition = document.getElementById('itemCondition').value;
+            const points = document.getElementById('itemPoints').value;
+            const fileInput = document.getElementById('itemImage');
+            const file = fileInput.files[0];
+
+            clearMessage();
+
+            // Frontend validation for item details including image
+            if (!description || description.length < 10) {
+                displayMessage('Please enter a detailed description (at least 10 characters).', 'error');
+                return;
+            }
+            if (!category) {
+                displayMessage('Please select a category.', 'error');
+                return;
+            }
+            if (!size) {
+                displayMessage('Please select a size.', 'error');
+                return;
+            }
+            if (!condition) {
+                displayMessage('Please select a condition.', 'error');
+                return;
+            }
+            if (isNaN(points) || parseInt(points, 10) < 10) {
+                displayMessage('Points value must be a number and at least 10.', 'error');
+                return;
+            }
+            if (!file) {
+                displayMessage('Please upload an image for your item.', 'error');
+                return;
+            }
+            if (file.size > 2 * 1024 * 1024) { // 2MB limit
+                displayMessage('Image file size must be less than 2MB.', 'error');
+                return;
+            }
+            const validImageTypes = ['image/jpeg', 'image/png'];
+            if (!validImageTypes.includes(file.type)) {
+                displayMessage('Only JPEG and PNG image formats are allowed.', 'error');
+                return;
+            }
+
+            displayMessage('Adding item and uploading image...', 'info');
+
+            const reader = new FileReader();
+            reader.readAsDataURL(file); // Reads the contents of the specified Blob or File.
+
+            reader.onloadend = async function() {
+                const base64data = reader.result; // Full base64 string, Apps Script will split
+                const fileName = file.name;
+
+                const requestBody = {
+                    action: 'addItem',
+                    sessionToken: localStorage.getItem('sessionToken'), // Send session token
+                    userId: userId, // Still good to send userId, though backend validates via session
+                    description: description,
+                    category: category,
+                    size: size,
+                    condition: condition,
+                    points: parseInt(points, 10), // Ensure points is a number
+                    image: base64data,
+                    imageName: fileName
+                };
+
+                try {
+                    const response = await fetch(APPS_SCRIPT_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json' // Specify JSON content type
+                        },
+                        body: JSON.stringify(requestBody) // Send as JSON string
+                    });
+                    const data = await response.json();
+
+                    if (data.status === 'success') {
+                        displayMessage(data.message + ' Your new item ID is: ' + data.itemId, 'success');
+                        if (data.updatedUserPoints !== undefined) {
+                            localStorage.setItem('userPoints', data.updatedUserPoints);
+                            updateHeaderForAuthenticatedUser(localStorage.getItem('userEmail'), localStorage.getItem('userPoints'));
+                        }
+                        document.getElementById('addItemForm').reset(); // Clear the form
+                    } else {
+                        displayMessage(data.message, 'error');
+                    }
+                } catch (error) {
+                    console.error('Error adding item:', error);
+                    displayMessage('An error occurred while adding the item. Please try again later.', 'error');
+                }
+            };
+
+            reader.onerror = function(error) {
+                console.error('FileReader error:', error);
+                displayMessage('Failed to read image file.', 'error');
+            };
+        }
+
+
+        // --- My Listed Items Page ---
+        async function renderMyItemsPage() {
+            currentView = 'myItems';
+            mainContent.innerHTML = `
+                <div id="my-items-container" style="max-width: 900px; width: 100%; text-align: center; margin: 20px auto;">
+                    <h2>My Listed Items</h2>
+                    <div id="response-message" class="message"></div>
+                    <div id="items-list" class="dashboard-sections" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
+                        <p>Loading your items...</p>
+                    </div>
+                </div>
+            `;
+            updateHeaderForAuthenticatedUser(localStorage.getItem('userEmail'), localStorage.getItem('userPoints'));
+
+            const userId = localStorage.getItem('userId');
+            const sessionToken = localStorage.getItem('sessionToken');
+            if (!userId || !sessionToken) {
+                displayMessage('You must be logged in to view your items.', 'error');
+                setTimeout(showAuthPage, 1500);
+                return;
+            }
+
+            displayMessage('Fetching your items...', 'info');
+
+            const requestBody = {
+                action: 'getItems', // Changed from 'getUserItems' to 'getItems' for consistency
+                userId: userId,
+                // No excludeOwner for 'myItems'
+                sessionToken: sessionToken
+            };
+
+            try {
+                const response = await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+                const data = await response.json();
+                const itemsListDiv = document.getElementById('items-list');
+
+                if (data.status === 'success' && data.items.length > 0) {
+                    clearMessage();
+                    itemsListDiv.innerHTML = ''; // Clear "Loading..."
+                    data.items.forEach(item => {
+                        itemsListDiv.innerHTML += `
+                            <div class="dashboard-card item-card">
+                                <img src="${item.imageUrl || 'https://via.placeholder.com/150?text=No+Image'}" alt="${item.description}" loading="lazy">
+                                <h3>${item.description}</h3>
+                                <p><strong>Category:</strong> ${item.category}</p>
+                                <p><strong>Size:</strong> ${item.size}</p>
+                                <p><strong>Condition:</strong> ${item.condition}</p>
+                                <p><strong>Points:</strong> ${item.points}</p>
+                                <p><strong>Status:</strong> <span style="font-weight: bold; color: ${item.status === 'available' ? 'var(--success-color)' : '#d32f2f'};">${item.status}</span></p>
+                                <button class="action-btn" onclick="alert('Edit functionality for item ${item.itemId} to be added!')">Edit</button>
+                                <button class="action-btn" style="background-color: #dc3545;" onclick="alert('Remove functionality for item ${item.itemId} to be added!')">Remove</button>
+                            </div>
+                        `;
+                    });
+                } else if (data.status === 'success' && data.items.length === 0) {
+                    itemsListDiv.innerHTML = '<p>You have not listed any items yet. Click "List a New Item" to get started!</p>';
+                    clearMessage();
+                } else {
+                    displayMessage(data.message, 'error');
+                    itemsListDiv.innerHTML = '<p>Failed to load your items.</p>';
+                }
+            } catch (error) {
+                console.error('Error fetching user items:', error);
+                displayMessage('An error occurred while loading your items. Please try again later.', 'error');
+                document.getElementById('items-list').innerHTML = '<p>Error loading items.</p>';
+            }
+        }
+
+        // --- Browse Available Items Page ---
+        async function renderBrowseItemsPage() {
+            currentView = 'browseItems';
+            mainContent.innerHTML = `
+                <div id="browse-items-container" style="max-width: 1000px; width: 100%; text-align: center; margin: 20px auto;">
+                    <h2>Browse Available Items</h2>
+                    <div id="response-message" class="message"></div>
+                    <div id="items-grid" class="dashboard-sections" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
+                        <p>Loading available items...</p>
+                    </div>
+                </div>
+            `;
+            updateHeaderForAuthenticatedUser(localStorage.getItem('userEmail'), localStorage.getItem('userPoints'));
+
+            const userId = localStorage.getItem('userId'); // Needed to exclude own items
+            const sessionToken = localStorage.getItem('sessionToken');
+            if (!userId || !sessionToken) {
+                displayMessage('You must be logged in to browse items.', 'error');
+                setTimeout(showAuthPage, 1500);
+                return;
+            }
+
+            displayMessage('Fetching available items...', 'info');
+
+            const requestBody = {
+                action: 'getItems', // Changed to 'getItems' for consistency
+                userId: userId,
+                excludeOwner: true, // Flag to exclude current user's items
+                sessionToken: sessionToken
+            };
+
+            try {
+                const response = await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+                const data = await response.json();
+                const itemsGridDiv = document.getElementById('items-grid');
+
+                if (data.status === 'success' && data.items.length > 0) {
+                    clearMessage();
+                    itemsGridDiv.innerHTML = ''; // Clear "Loading..."
+                    data.items.forEach(item => {
+                        itemsGridDiv.innerHTML += `
+                            <div class="dashboard-card item-card">
+                                <img src="${item.imageUrl || 'https://via.placeholder.com/150?text=No+Image'}" alt="${item.description}" loading="lazy">
+                                <h3>${item.description}</h3>
+                                <p><strong>Category:</strong> ${item.category}</p>
+                                <p><strong>Size:</strong> ${item.size}</p>
+                                <p><strong>Condition:</strong> ${item.condition}</p>
+                                <p><strong>Points:</strong> ${item.points}</p>
+                                <button class="action-btn" onclick="alert('View details and swap for item ${item.itemId} to be added!')">View Details</button>
+                            </div>
+                        `;
+                    });
+                } else if (data.status === 'success' && data.items.length === 0) {
+                    itemsGridDiv.innerHTML = '<p>No items currently available for exchange.</p>';
+                    clearMessage();
+                } else {
+                    displayMessage(data.message, 'error');
+                    itemsGridDiv.innerHTML = '<p>Failed to load available items.</p>';
+                }
+            } catch (error) {
+                console.error('Error fetching available items:', error);
+                displayMessage('An error occurred while loading items. Please try again later.', 'error');
+                document.getElementById('items-grid').innerHTML = '<p>Error loading items.</p>';
+            }
+        }
+
+
+        // --- Initial Load Logic ---
+        function checkAuthAndRender() {
+            const sessionToken = localStorage.getItem('sessionToken');
+            const userId = localStorage.getItem('userId');
+            const userEmail = localStorage.getItem('userEmail');
+            const userPoints = localStorage.getItem('userPoints');
+
+            if (sessionToken && userId && userEmail) {
+                updateHeaderForAuthenticatedUser(userEmail, userPoints);
+                // If a specific view was active, try to re-render it, otherwise go to dashboard
+                if (currentView === 'myItems') {
+                    renderMyItemsPage();
+                } else if (currentView === 'browseItems') {
+                    renderBrowseItemsPage();
+                } else if (currentView === 'addItem') {
+                    renderAddItemPage();
+                } else {
+                    renderDashboardPage();
+                }
+            } else {
+                showAuthPage();
+            }
+            document.getElementById('loading-spinner').style.display = 'none'; // Hide loading spinner
+        }
+
+        // Run on page load
+        window.addEventListener('load', checkAuthAndRender);
+    </script>
+</body>
 </html>

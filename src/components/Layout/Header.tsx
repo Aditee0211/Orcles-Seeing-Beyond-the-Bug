@@ -36,6 +36,19 @@ const Header: React.FC = () => {
             </div>
             <span className="text-xl font-bold text-gray-900">ReWear</span>
           </Link>
+          
+          {/* Navigation Links */}
+          <div className="hidden md:flex items-center space-x-6">
+            <Link to="/" className="text-gray-600 hover:text-gray-900 transition-colors duration-200">
+              Home
+            </Link>
+            <Link to="/landing" className="text-gray-600 hover:text-gray-900 transition-colors duration-200">
+              Classic View
+            </Link>
+            <Link to="/browse" className="text-gray-600 hover:text-gray-900 transition-colors duration-200">
+              Browse
+            </Link>
+          </div>
 
           {/* Search Bar - Desktop */}
           <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-lg mx-8">
